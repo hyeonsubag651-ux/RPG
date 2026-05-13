@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>환장 RPG</title>
+
+<style>
+
+body{
+    margin:0;
+    background:#0f0f0f;
+    color:white;
+    font-family:Arial;
+}
+
+#game{
+    padding:20px;
+}
+
+.title{
+    font-size:40px;
+    color:#b56cff;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
+.box{
+    background:#1b1b1b;
+    border:2px solid #333;
+    border-radius:15px;
+    padding:15px;
+    margin-bottom:15px;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    margin-top:10px;
+    border:none;
+    border-radius:10px;
+    background:#7a3cff;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#9b67ff;
+}
+
+input{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:10px;
+    margin-top:10px;
+    font-size:18px;
+}
+
+.red{
+    color:red;
+}
+
+.green{
+    color:lime;
+}
+
+.gold{
+    color:gold;
+}
+
+.purple{
+    color:#c56cff;
+}
+
+.placeTitle{
+    color:cyan;
+    font-size:25px;
+    margin-bottom:10px;
+}
+
+.item-normal{color:white;}
+.item-rare{color:#4db8ff;}
+.item-unique{color:lime;}
+.item-ancient{color:orange;}
+.item-epic{color:#d96cff;}
+.item-legend{color:gold;}
+.item-hero{color:red;}
+.item-trans{color:#ff66ff;}
+.item-myth{color:#00ffff;}
+
+</style>
+</head>
+<body>
+
+<div id="game">
+
+<div class="title">
+환장 RPG
+</div>
+
+<!-- 닉네임 -->
+<div class="box" id="nicknameBox">
+
+<h2>닉네임 생성</h2>
+
+<input type="text" id="nickname" placeholder="닉네임 입력">
+
+<button onclick="startGame()">
+게임 시작
+</button>
+
+</div>
+
+<!-- 메인 -->
+<div id="mainGame" style="display:none;">
+
+<!-- 플레이어 -->
+<div class="box">
+
+<h2 id="playerName"></h2>
+
+<p>레벨: <span id="level">1</span></p>
+<p>골드: <span id="gold">0</span></p>
+<p>현재 위치: <span id="location">시작 지점</span></p>
+
+<p>
+무기:
+<span class="green" id="weapon">
+나무 몽둥이
+</span>
+(공격력 +1)
+</p>
+
+</div>
+
+<!-- 토끼공듀 -->
+<div class="box">
+
+<h2>토끼공듀</h2>
+
+<p>
+와!! 뉴비다!! 뉴비!
+내가 알려줄게!
+</p>
+
+<p>
+저기 초보마을로 가면
+마을 이장님이 있어!
+</p>
+
+<p>
+거기서 나무 방망이 받고
+사냥을 하면 돼!
+</p>
+
+</div>
+
+<!-- 이동 -->
+<div class="box">
+
+<h2>이동</h2>
+
+<button onclick="move('village')">
+초보 마을
+</button>
+
+<button onclick="move('forest')">
+숲
+</button>
+
+<button onclick="move('trade')">
+트레이드 마켓
+</button>
+
+<button onclick="move('guild')">
+길드
+</button>
+
+<button onclick="move('worldQuest')">
+월드 퀘스트
+</button>
+
+<button onclick="move('prison')">
+지하 감옥
+</button>
+
+</div>
+
+<!-- 장소 출력 -->
+<div class="box">
+
+<div class="placeTitle" id="placeTitle">
+시작 위치
+</div>
+
+<div id="placeContent">
+게임을 시작하세요.
+</div>
+
+</div>
+
+<!-- 상태이상 -->
+<div class="box">
+
+<h2>상태 이상</h2>
+
+<ul>
+<li>출혈</li>
+<li>과식</li>
+<li>혈당 스파이크</li>
+<li>독</li>
+<li>마비</li>
+<li>화상</li>
+<li>냉동</li>
+</ul>
+
+</div>
+
+<!-- 희귀무기 -->
+<div class="box">
+
+<h2>희귀 무기</h2>
+
+<p class="item-legend">
+플람베리온
+</p>
+
+<p class="item-trans">
+적월선
+</p>
+
+<p class="item-myth">
+엘렉시아스
+</p>
+
+<p class="item-hero">
+이클립스
+</p>
+
+</div>
+
+<!-- 로그 -->
+<div class="box">
+
+<h2>게임 로그</h2>
+
+<div id="log">
+게임 시작 준비 완료.
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let player = {
+    nickname:"",
+    level:1,
+    gold:0,
+    weapon:"나무 몽둥이",
+    inventory:[]
+};
+
+function addLog(text){
+
+    document.getElementById("log").innerHTML +=
+    "<br>" + text;
+
+}
+
+function startGame(){
+
+    let nick =
+    document.getElementById("nickname").value;
+
+    if(nick.trim() == ""){
+
+        alert("닉네임을 입력하세요!");
+        return;
+
+    }
+
+    if(nick.includes("현질")){
+
+        alert("GM: 금지어 감지. 정지되었습니다.");
+        return;
+
+    }
+
+    player.nickname = nick;
+
+    document.getElementById("nicknameBox").style.display = "none";
+
+    document.getElementById("mainGame").style.display = "block";
+
+    document.getElementById("playerName").innerText =
+    player.nickname;
+
+    addLog(player.nickname + " 님이 접속했습니다.");
+
+}
+
+function move(place){
+
+    let title =
+    document.getElementById("placeTitle");
+
+    let content =
+    document.getElementById("placeContent");
+
+    if(place == "village"){
+
+        document.getElementById("location").innerText =
+        "초보 마을";
+
+        title.innerText =
+        "초보 마을";
+
+        content.innerHTML = `
+        <p>
+        마을 사람들이 평화롭게 살고 있다.
+        </p>
+
+        <button onclick="talkChief()">
+        마을 이장과 대화
+        </button>
+        `;
+
+        addLog("초보 마을로 이동했습니다.");
+
+    }
+
+    if(place == "forest"){
+
+        document.getElementById("location").innerText =
+        "숲";
+
+        title.innerText =
+        "숲";
+
+        let monster = randomMonster();
+
+        content.innerHTML = `
+        <p>
+        ${monster} 발견!
+        </p>
+
+        <button onclick="hunt('${monster}')">
+        공격하기
+        </button>
+        `;
+
+        addLog("숲으로 이동했습니다.");
+
+    }
+
+    if(place == "trade"){
+
+        document.getElementById("location").innerText =
+        "트레이드 마켓";
+
+        title.innerText =
+        "트레이드 마켓";
+
+        content.innerHTML = `
+        <p>
+        유저들이 거래 중이다.
+        </p>
+
+        <p class="red">
+        어떤 유저가 0빼기 사기를 시도 중...
+        </p>
+        `;
+
+        addLog("트레이드 마켓에 입장했습니다.");
+
+    }
+
+    if(place == "guild"){
+
+        document.getElementById("location").innerText =
+        "길드";
+
+        title.innerText =
+        "길드";
+
+        content.innerHTML = `
+        <p>
+        길드 시스템.
+        </p>
+
+        <p>
+        길드 마스터는 탈퇴 불가.
+        </p>
+
+        <p class="red">
+        검붉은 길드전이 진행중...
+        </p>
+        `;
+
+        addLog("길드 메뉴를 열었습니다.");
+
+    }
+
+    if(place == "worldQuest"){
+
+        document.getElementById("location").innerText =
+        "월드 퀘스트";
+
+        title.innerText =
+        "월드 퀘스트";
+
+        content.innerHTML = `
+        <p>
+        거대한 몬스터 토벌 진행중!
+        </p>
+
+        <p>
+        기여도에 따라 보상이 지급됩니다.
+        </p>
+        `;
+
+        addLog("월드 퀘스트 시작.");
+
+    }
+
+    if(place == "prison"){
+
+        document.getElementById("location").innerText =
+        "지하 감옥";
+
+        title.innerText =
+        "지하 감옥";
+
+        content.innerHTML = `
+        <p class="red">
+        PK 유저들이 갇혀있다...
+        </p>
+        `;
+
+        addLog("지하 감옥으로 이동.");
+
+    }
+
+}
+
+function talkChief(){
+
+    addLog("마을 이장이 나무 검을 지급했습니다.");
+
+    player.weapon = "나무 검";
+
+    document.getElementById("weapon").innerText =
+    "나무 검";
+
+}
+
+function randomMonster(){
+
+    let monsters = [
+
+        "토끼",
+        "사슴",
+        "슬라임",
+        "늑대",
+        "드래곤",
+        "좀비",
+        "닭"
+
+    ];
+
+    return monsters[
+        Math.floor(Math.random()*monsters.length)
+    ];
+
+}
+
+function hunt(monster){
+
+    addLog(monster + " 처치!");
+
+    if(monster == "토끼"){
+
+        addLog("토끼의 간 획득!");
+
+        player.inventory.push("토끼의 간");
+
+        player.gold += 3;
+
+    }
+
+    if(monster == "사슴"){
+
+        addLog("사슴고기 획득!");
+        addLog("사슴녹용 획득!");
+
+        player.gold += 27;
+
+    }
+
+    document.getElementById("gold").innerText =
+    player.gold;
+
+}
+
+</script>
+
+</body>
+</html>
